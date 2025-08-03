@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 interface FileUploaderProps {
-  onUploadComplete: (studyId: string) => void;
+  onUploadComplete: (studyUid: string, segmentationClasses?: any[]) => void;
 }
 
 const RADIOGRAPHY_TYPES = [
@@ -105,21 +105,41 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadComplete }) 
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          // Simulate successful upload with a study ID
-          setTimeout(() => {
-            setIsUploading(false);
-            onUploadComplete('study-' + Math.random().toString(36).substr(2, 9));
-          }, 500);
-          return 100;
-        }
-        return prev + Math.random() * 10;
+    try {
+      const formData = new FormData();
+      formData.append('image_file', imageFile.file);
+      formData.append('mask_file', maskFile.file);
+      formData.append('radiography_type', radiographyType);
+
+      // Simulate progress during upload
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + Math.random() * 20, 90));
+      }, 200);
+
+      const response = await fetch('http://localhost:9999/upload', {
+        method: 'POST',
+        body: formData,
       });
-    }, 200);
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      setUploadProgress(100);
+
+      setTimeout(() => {
+        setIsUploading(false);
+        onUploadComplete(result.study_uid, result.segmentation_classes);
+      }, 500);
+
+    } catch (error) {
+      setIsUploading(false);
+      setUploadProgress(0);
+      alert('Upload failed: ' + (error as Error).message);
+    }
   };
 
   const canUpload = uploadedFiles.length === 2 && radiographyType && !isUploading;

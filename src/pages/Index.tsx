@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileUploader } from '@/components/FileUploader';
-import { DicomViewer } from '@/components/DicomViewer';
+import { RealDicomViewer } from '@/components/RealDicomViewer';
 import { SegmentationSidebar } from '@/components/SegmentationSidebar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Activity } from 'lucide-react';
@@ -10,8 +10,8 @@ const Index = () => {
   const [studyId, setStudyId] = useState<string>('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const handleUploadComplete = (newStudyId: string) => {
-    setStudyId(newStudyId);
+  const handleUploadComplete = (studyUid: string, segmentationClasses?: any[]) => {
+    setStudyId(studyUid);
     setCurrentStep('viewer');
   };
 
@@ -91,7 +91,7 @@ const Index = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* DICOM Viewer */}
         <div className="flex-1 flex flex-col">
-          <DicomViewer studyId={studyId} />
+          <RealDicomViewer studyUid={studyId} />
         </div>
 
         {/* Segmentation Sidebar */}
@@ -99,6 +99,7 @@ const Index = () => {
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           onSegmentationChange={handleSegmentationChange}
+          studyUid={studyId}
         />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Palette, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -21,6 +21,7 @@ interface SegmentationSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onSegmentationChange: (classId: string, visible: boolean, opacity: number) => void;
+  studyUid?: string;
 }
 
 const SEGMENTATION_CLASSES: SegmentationClass[] = [
@@ -78,10 +79,19 @@ export const SegmentationSidebar: React.FC<SegmentationSidebarProps> = ({
   isCollapsed,
   onToggleCollapse,
   onSegmentationChange,
+  studyUid,
 }) => {
   const [classes, setClasses] = useState<SegmentationClass[]>(SEGMENTATION_CLASSES);
   const [globalOpacity, setGlobalOpacity] = useState(70);
   const [showAll, setShowAll] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (studyUid) {
+      console.log('Loading segmentation classes for study:', studyUid);
+      // Future: Load real segmentation classes from backend
+    }
+  }, [studyUid]);
 
   const updateClass = (id: string, updates: Partial<SegmentationClass>) => {
     setClasses(prev => 
